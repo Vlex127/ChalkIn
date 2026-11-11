@@ -1,0 +1,9 @@
+{
+  "name": "ChalkIn",
+  "short_name": "ChalkIn",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0a0a0a",
+  "icons": []
+}
