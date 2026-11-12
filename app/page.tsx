@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Offline Attendance for Nigerian Universities",
@@ -58,9 +59,9 @@ export default function HomePage() {
     <div className="min-h-screen bg-white text-neutral-900">
       <header className="sticky top-0 z-10 border-b border-neutral-200 bg-white/85 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-          <a href="#" className="text-lg font-semibold tracking-tight">
+          <Link href="/" className="text-lg font-semibold tracking-tight">
             ChalkIn
-          </a>
+          </Link>
           <nav aria-label="Primary" className="flex items-center gap-5 text-sm">
             <a href="#how-it-works" className="hidden text-neutral-600 hover:text-neutral-900 sm:inline">
               How it works
@@ -68,14 +69,18 @@ export default function HomePage() {
             <a href="#features" className="hidden text-neutral-600 hover:text-neutral-900 sm:inline">
               Features
             </a>
-            <a
-              href={GITHUB_URL}
-              className="rounded-full bg-neutral-900 px-4 py-2 font-medium text-white hover:bg-neutral-700"
-              target="_blank"
-              rel="noreferrer"
+            <Link
+              href="/login"
+              className="text-neutral-600 hover:text-neutral-900"
             >
-              GitHub
-            </a>
+              Log in
+            </Link>
+            <Link
+              href="/signup/student"
+              className="rounded-full bg-neutral-900 px-4 py-2 font-medium text-white hover:bg-neutral-700"
+            >
+              Get started
+            </Link>
           </nav>
         </div>
       </header>
@@ -96,17 +101,21 @@ export default function HomePage() {
               there.
             </p>
             <div className="flex flex-wrap items-center gap-3">
-              <a
-                href={GITHUB_URL}
+              <Link
+                href="/signup/student"
                 className="rounded-full bg-emerald-400 px-5 py-3 font-medium text-neutral-950 hover:bg-emerald-300"
-                target="_blank"
-                rel="noreferrer"
               >
-                Follow the build on GitHub
-              </a>
+                Create a student account
+              </Link>
+              <Link
+                href="/signup/lecturer"
+                className="rounded-full border border-neutral-700 px-5 py-3 font-medium text-neutral-200 hover:border-neutral-500"
+              >
+                Lecturer sign up
+              </Link>
               <a
                 href="#how-it-works"
-                className="rounded-full border border-neutral-700 px-5 py-3 font-medium text-neutral-200 hover:border-neutral-500"
+                className="px-2 py-3 text-sm text-neutral-400 hover:text-neutral-200"
               >
                 See how it works
               </a>
@@ -213,9 +222,22 @@ export default function HomePage() {
       </main>
 
       <footer className="border-t border-neutral-200">
-        <div className="mx-auto flex max-w-5xl flex-col gap-2 px-6 py-8 text-sm text-neutral-500 sm:flex-row sm:items-center sm:justify-between">
-          <p>&copy; {new Date().getFullYear()} ChalkIn</p>
-          <p>Offline attendance for Nigerian universities.</p>
+        <div className="mx-auto flex max-w-5xl flex-col gap-3 px-6 py-8 text-sm text-neutral-500 sm:flex-row sm:items-center sm:justify-between">
+          <p>
+            &copy; {new Date().getFullYear()} ChalkIn. Offline attendance for
+            Nigerian universities.
+          </p>
+          <nav aria-label="Footer" className="flex flex-wrap gap-4">
+            <Link href="/login" className="hover:text-neutral-900">
+              Log in
+            </Link>
+            <Link href="/signup/student" className="hover:text-neutral-900">
+              Student sign up
+            </Link>
+            <Link href="/signup/lecturer" className="hover:text-neutral-900">
+              Lecturer sign up
+            </Link>
+          </nav>
         </div>
       </footer>
     </div>

@@ -1,4 +1,4 @@
-import { supabase } from '../supabase/client';
+import { getSupabaseClient } from '../supabase/client';
 import { getDb, type OutboxItem, type ServerStatus } from './db';
 
 const BATCH = 20;
@@ -80,6 +80,7 @@ async function applyResults(batch: OutboxItem[], results: Result[]) {
 /** Pull the latest verdict for submissions that were still pending or flagged. */
 async function refreshStatuses(userId: string) {
   const db = await getDb();
+  const supabase = getSupabaseClient();
   const open = (await db.getAllFromIndex('outbox', 'by-user', userId)).filter(
     (i) =>
       i.kind === 'submission' &&
@@ -118,6 +119,7 @@ export async function trySync(userId: string): Promise<void> {
 
   try {
     const db = await getDb();
+    const supabase = getSupabaseClient();
 
     // Anything stuck in 'sending' (tab closed mid-request) goes back in the queue.
     for (const it of await db.getAllFromIndex('outbox', 'by-user', userId)) {

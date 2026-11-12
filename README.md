@@ -8,9 +8,10 @@ returns. It is built for large classes and patchy data.
 
 ## Status
 
-Early build. The landing page, offline core, sync route, and initial database
-migration exist. Auth screens, dashboards, and the service worker are next. The
-migration has not been run against a live Supabase project yet.
+Early build. The landing page, offline core, sync route, initial database
+migration, and auth screens exist. The migration and auth flows have not been
+run against a live Supabase project yet, so treat them as untested. Dashboards,
+roster upload, and the service worker are next.
 
 ## Stack
 
@@ -60,16 +61,43 @@ git-ignored.
 ## Project structure
 
 ```
-app/                 routes, landing page, /api/sync route
-components/          shared React components
+app/                 routes, landing page, auth pages, /api/sync route
+components/          shared React components (auth forms, sign out)
 lib/
+  auth/              server actions for login, signup, sign out
   crypto/            canonical signing strings, device keys
   offline/           IndexedDB schema, outbox, sync engine
-  supabase/          browser client
+  supabase/          browser, server, and service-role clients
 supabase/migrations/ database schema, RLS, and RPCs
 docs/                architecture, flows, and notes
 public/              static assets and web manifest
+middleware.ts        session refresh and route guards
 ```
+
+## Auth setup
+
+Sign up reads `role`, `full_name`, and `matric_no` or `staff_no` from the
+Supabase signup metadata and stores them on `profiles` through the
+`handle_new_user` trigger.
+
+- **Students** are active immediately and land on `/home`.
+- **Lecturers** are created with `approved = false` and land on `/pending`.
+  Approve them from the SQL editor:
+
+  ```sql
+  update profiles set approved = true where role = 'lecturer';
+  ```
+
+- **Admins** are promoted manually:
+
+  ```sql
+  update profiles set role = 'admin' where id = '<auth-user-id>';
+  ```
+
+If email confirmation is enabled in Supabase Auth, new users must confirm before
+they can log in. Set the project's Site URL to your app origin so confirmation
+links resolve. The app works without Supabase env vars for the public landing
+page, but auth pages show a setup notice until the variables are set.
 
 ## Database setup
 
@@ -102,7 +130,7 @@ and `pnpm lint` before pushing.
 
 1. Landing page and project docs (done)
 2. Offline core and `/api/sync` (done)
-3. Supabase auth screens and role routing
+3. Supabase auth screens and role routing (done, pending a live project)
 4. PWA service worker and install prompt
 5. Lecturer dashboard, roster upload, and reports
 6. Vitest coverage for signing and sync logic
