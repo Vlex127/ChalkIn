@@ -1,33 +1,147 @@
 # ChalkIn
 
-Scaffolded with `create-nextjs-app` — Next.js (App Router, TypeScript, Tailwind) pre-wired for SEO.
+Offline attendance for Nigerian universities.
 
-## What's already set up
+ChalkIn lets a lecturer start a class session, students check in from their
+phones without a network, and the records sync automatically when a connection
+returns. It is built for large classes and patchy data.
 
-- **Metadata API** (`app/layout.tsx`) — title template, description, OG/Twitter cards, robots directives, canonical URL.
-- **Sitemap** (`app/sitemap.ts`) — generates `/sitemap.xml` automatically.
-- **Robots** (`app/robots.ts`) — generates `/robots.txt`, points crawlers at the sitemap.
-- **OG image** (`app/opengraph-image.tsx`) — auto-generated share card, no design tool needed.
-- **JSON-LD** (`components/JsonLd.tsx`) — structured data helper, `WebSite` schema wired into the root layout.
-- **Semantic HTML** (`app/page.tsx`) — single `<h1>`, real landmark tags, per-page metadata override example.
+## Status
 
-## Before you deploy — SEO checklist
+Early build. The landing page, offline core, sync route, initial database
+migration, and auth screens exist. The migration and auth flows have not been
+run against a live Supabase project yet, so treat them as untested. Dashboards,
+roster upload, and the service worker are next.
 
-- [ ] Replace `SITE_URL` in `app/layout.tsx`, `app/sitemap.ts`, `app/robots.ts` with your real domain.
-- [ ] Write a real, unique title + description per route (override `metadata` in each `page.tsx`).
-- [ ] Add every real route to `app/sitemap.ts`.
-- [ ] Swap the generated OG image for a branded one, or customize `app/opengraph-image.tsx`.
-- [ ] Add favicon.ico + apple-touch-icon.png to `public/`.
-- [ ] Add relevant JSON-LD per page (Article, Product, FAQPage, BreadcrumbList — see [schema.org](https://schema.org)).
-- [ ] Set up Google Search Console + submit the sitemap; fill in `verification` in `app/layout.tsx`.
-- [ ] Run Lighthouse / PageSpeed Insights — Core Web Vitals are a ranking factor.
-- [ ] Use `next/image` for every image (already configured for AVIF/WebP).
+## Stack
 
-## Commands
+- Next.js 15 (App Router) and React 19
+- TypeScript in strict mode
+- Tailwind CSS
+- Supabase for Postgres, Auth, and row-level security
+- Zod for request validation
+- `idb` for the IndexedDB queue
+- Web Crypto ECDSA P-256 device keys
+- Vitest for tests (planned)
+
+## Getting started
+
+Requires Node.js 20+ and pnpm.
 
 ```bash
-npm run dev     # local dev server
-npm run build   # production build
-npm run start   # run the production build
-npm run lint    # eslint
+pnpm install
+pnpm dev
 ```
+
+Open <http://localhost:3000>.
+
+## Scripts
+
+```bash
+pnpm dev     # local dev server
+pnpm build   # production build
+pnpm start   # run the production build
+pnpm lint    # eslint
+```
+
+## Environment variables
+
+Copy `.env.example` to `.env.local` and fill in real values. `.env.local` is
+git-ignored.
+
+| Variable                        | Used by         | Notes                       |
+| ------------------------------- | --------------- | --------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`      | client + server | Supabase project URL        |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | client + server | Public anon key             |
+| `SUPABASE_SERVICE_ROLE_KEY`     | server only     | Never expose to the browser |
+
+`/api/sync` needs the service role key. It must never be prefixed with
+`NEXT_PUBLIC_`.
+
+## Project structure
+
+```
+app/                 routes, landing page, auth pages, /api/sync route
+components/          shared React components (auth forms, sign out)
+lib/
+  auth/              server actions for login, signup, sign out
+  crypto/            canonical signing strings, device keys
+  offline/           IndexedDB schema, outbox, sync engine
+  supabase/          browser, server, and service-role clients
+supabase/migrations/ database schema, RLS, and RPCs
+docs/                architecture, flows, and notes
+public/              static assets and web manifest
+middleware.ts        session refresh and route guards
+```
+
+## Auth setup
+
+Sign up reads `role`, `full_name`, and `matric_no` or `staff_no` from the
+Supabase signup metadata and stores them on `profiles` through the
+`handle_new_user` trigger.
+
+- **Students** are active immediately and land on `/home`.
+- **Lecturers** are created with `approved = false` and land on `/pending`.
+  Approve them from the SQL editor:
+
+  ```sql
+  update profiles set approved = true where role = 'lecturer';
+  ```
+
+- **Admins** are promoted manually:
+
+  ```sql
+  update profiles set role = 'admin' where id = '<auth-user-id>';
+  ```
+
+If email confirmation is enabled in Supabase Auth, new users must confirm before
+they can log in. Set the project's Site URL to your app origin so confirmation
+links resolve. The app works without Supabase env vars for the public landing
+page, but auth pages show a setup notice until the variables are set.
+
+## Database setup
+
+The migration lives at `supabase/migrations/0001_init.sql`. Apply it to a fresh
+Supabase dev project before running the app:
+
+```bash
+supabase db push
+```
+
+Or paste it into the Supabase SQL editor. Enable `pg_cron` and schedule the
+commented `sweep_pending` job. See [`docs/architecture.md`](docs/architecture.md)
+for the RLS and verification rules.
+
+## How sync works
+
+1. A check-in or session is written to IndexedDB first.
+2. `lib/offline/sync.ts` batches queued items and POSTs them to `/api/sync`.
+3. The route verifies the device signature and calls the ingest RPCs with the
+   service role key.
+4. Verification (code, time window, roster, location, duplicates) runs in SQL.
+
+## Testing
+
+No test runner is configured yet. Vitest will be added with the first tests for
+the canonical signing strings and the sync queue. Until then, run `pnpm build`
+and `pnpm lint` before pushing.
+
+## Roadmap
+
+1. Landing page and project docs (done)
+2. Offline core and `/api/sync` (done)
+3. Supabase auth screens and role routing (done, pending a live project)
+4. PWA service worker and install prompt
+5. Lecturer dashboard, roster upload, and reports
+6. Vitest coverage for signing and sync logic
+
+## Documentation
+
+- [Architecture](docs/architecture.md)
+- [Lecturer flow](docs/flows/lecturer.md)
+- [Student flow](docs/flows/student.md)
+- [Offline queue notes](docs/offline-queue.md)
+
+## License
+
+MIT. See [`LICENSE`](LICENSE).

@@ -5,7 +5,7 @@ import "./globals.css";
 const SITE_URL = "https://chalkin.com";
 const SITE_NAME = "ChalkIn";
 const SITE_DESCRIPTION =
-  "Describe what ChalkIn does in one clear sentence — this becomes your default meta description and OG description.";
+  "ChalkIn lets lecturers take class attendance without internet, then syncs automatically when the network returns. Built for Nigerian universities.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -14,7 +14,13 @@ export const metadata: Metadata = {
     template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
-  keywords: ["ChalkIn"],
+  keywords: [
+    "ChalkIn",
+    "offline attendance",
+    "Nigerian universities",
+    "class attendance",
+    "student attendance app",
+  ],
   applicationName: SITE_NAME,
   authors: [{ name: SITE_NAME }],
   creator: SITE_NAME,

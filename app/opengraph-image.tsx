@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "ChalkIn";
+export const alt = "ChalkIn — Offline attendance for Nigerian universities";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -19,13 +19,19 @@ export default async function OpengraphImage() {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
+          gap: 24,
           background: "#0a0a0a",
           color: "#fafafa",
-          fontSize: 64,
-          fontWeight: 600,
+          padding: 48,
+          textAlign: "center",
         }}
       >
-        ChalkIn
+        <div style={{ fontSize: 72, fontWeight: 700, letterSpacing: "-0.02em" }}>
+          ChalkIn
+        </div>
+        <div style={{ fontSize: 30, color: "#a3a3a3" }}>
+          Offline attendance for Nigerian universities
+        </div>
       </div>
     ),
     { ...size }
